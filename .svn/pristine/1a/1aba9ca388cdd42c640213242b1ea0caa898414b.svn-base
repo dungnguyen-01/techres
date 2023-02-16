@@ -1,0 +1,12 @@
+package vn.aloapp.training.springboot.dao;
+
+import vn.aloapp.training.springboot.entity.Restaurant;
+import vn.aloapp.training.springboot.entity.StoreProcedureListResult;
+
+public interface RestaurantDao {
+
+	public Restaurant spUCreateRestaurant(String name, String email, String phone, String info, String address,
+			String logo) throws Exception;
+
+	public StoreProcedureListResult<Restaurant> spGListRestaurants() throws Exception;
+}

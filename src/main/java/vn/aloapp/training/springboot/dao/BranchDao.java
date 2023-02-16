@@ -1,0 +1,22 @@
+package vn.aloapp.training.springboot.dao;
+
+import vn.aloapp.training.springboot.entity.Branch;
+import vn.aloapp.training.springboot.entity.StoreProcedureListResult;
+
+public interface BranchDao {
+
+	Branch spUCreateBranch(String name, int restaurantId, int restaurantBrandId, String streetName, String phoneNumber,
+			String addressFullText, int status) throws Exception;
+
+	Branch findById(Integer id) throws Exception;
+
+	Branch spUpdateBranch(Branch branch) throws Exception;
+
+	StoreProcedureListResult<Branch> spGListBranches() throws Exception;
+
+	void deleteById(Branch branch) throws Exception;
+
+	StoreProcedureListResult<Branch> spGFilterBranches(String keyword, Integer status, Integer restaurantBrandId,
+			Integer restaurantId) throws Exception;
+
+}

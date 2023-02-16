@@ -1,0 +1,31 @@
+package vn.aloapp.training.springboot.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import vn.aloapp.training.springboot.dao.RestaurantDao;
+import vn.aloapp.training.springboot.entity.Restaurant;
+import vn.aloapp.training.springboot.entity.StoreProcedureListResult;
+
+@Service("restaurantService")
+@Transactional
+public class RestaurantServiceImpl implements RestaurantService {
+
+	@Autowired
+	RestaurantDao dao;
+
+	@Override
+	public Restaurant spUCreateRestaurant(String name, String email, String phone, String info, String address,
+			String logo) throws Exception {
+		// TODO Auto-generated method stub
+		return dao.spUCreateRestaurant(name, email, phone, info, address, logo);
+	}
+
+	@Override
+	public StoreProcedureListResult<Restaurant> spGListRestaurants() throws Exception {
+		// TODO Auto-generated method stub
+		return dao.spGListRestaurants();
+	}
+
+}

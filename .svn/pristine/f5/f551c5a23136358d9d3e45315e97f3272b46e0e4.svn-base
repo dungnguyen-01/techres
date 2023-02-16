@@ -1,0 +1,29 @@
+spring.datasource.driver.classname = com.mysql.jdbc.Driver
+
+spring.datasource.url = jdbc:mysql://beta.database.techres.vn/techres_training?characterEncoding=UTF-8&useLegacyDatetimeCode=false&zeroDateTimeBehavior=CONVERT_TO_NULL&serverTimezone=Asia/Ho_Chi_Minh
+spring.datasource.username = techres_beta
+spring.datasource.password = 71dca359-0653-4843-bcdc-94e3e3d8f3
+
+hibernate.dialect = org.hibernate.dialect.MySQLDialect
+hibernate.show_sql = false
+hibernate.format_sql = true
+
+security.oauth2-endpoint=http://localhost:8080/oauth/token
+#security.oauth2.resource.filter-order=3
+
+security.signing-key=bmVlZGlpc2VjcmV0
+security.encoding-strength=256
+security.security-realm=Spring Boot JWT Realm
+
+security.jwt.client-id=pstudio_api
+security.jwt.client-secret=bmVlZGlpYXBp
+security.jwt.grant-type=password
+security.jwt.scope-read=read
+security.jwt.scope-write=write
+security.jwt.resource-ids=pstudioapi
+
+spring.servlet.multipart.max-file-size=20MB
+spring.servlet.multipart.max-request-size=20MB
+
+
+

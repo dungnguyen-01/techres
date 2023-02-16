@@ -1,0 +1,78 @@
+package vn.aloapp.training.springboot.dao;
+
+import javax.persistence.ParameterMode;
+import javax.persistence.StoredProcedureQuery;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Repository;
+
+import vn.aloapp.training.common.enums.StoreProcedureStatusCodeEnum;
+import vn.aloapp.training.common.exception.TechresHttpException;
+import vn.aloapp.training.springboot.entity.Restaurant;
+import vn.aloapp.training.springboot.entity.StoreProcedureListResult;
+
+@Repository("restaurantDao")
+@SuppressWarnings("unchecked")
+public class RestaurantDaoImpl extends AbstractDao<Integer, Restaurant> implements RestaurantDao {
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Restaurant spUCreateRestaurant(String name, String email, String phone, String info, String address,
+			String logo) throws Exception {
+		// TODO Auto-generated method stub
+		StoredProcedureQuery query = this.getSession()
+				.createStoredProcedureQuery("sp_u_create_restaurant", Restaurant.class)
+				.registerStoredProcedureParameter("_name", String.class, ParameterMode.IN)
+				.registerStoredProcedureParameter("_email", String.class, ParameterMode.IN)
+				.registerStoredProcedureParameter("_phone", String.class, ParameterMode.IN)
+				.registerStoredProcedureParameter("_info", String.class, ParameterMode.IN)
+				.registerStoredProcedureParameter("_address", String.class, ParameterMode.IN)
+				.registerStoredProcedureParameter("_logo", String.class, ParameterMode.IN)
+
+				.registerStoredProcedureParameter("status_code", Integer.class, ParameterMode.OUT)
+				.registerStoredProcedureParameter("message_error", String.class, ParameterMode.OUT);
+
+		query.setParameter("_name", name);
+		query.setParameter("_email", email);
+		query.setParameter("_phone", phone);
+		query.setParameter("_info", info);
+		query.setParameter("_address", address);
+		query.setParameter("_logo", logo);
+
+		int statusCode = (int) query.getOutputParameterValue("status_code");
+		String messageError = query.getOutputParameterValue("message_error").toString();
+
+		switch (StoreProcedureStatusCodeEnum.valueOf(statusCode)) {
+		case SUCCESS:
+			return (Restaurant) query.getResultList().stream().findFirst().orElse(null);
+		case INPUT_INVALID:
+			throw new TechresHttpException(HttpStatus.BAD_REQUEST, messageError);
+		default:
+			throw new Exception(messageError);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public StoreProcedureListResult<Restaurant> spGListRestaurants() throws Exception {
+		// TODO Auto-generated method stub
+		StoredProcedureQuery query = this.getSession()
+				.createStoredProcedureQuery("sp_g_list_restaurants", Restaurant.class)
+
+				.registerStoredProcedureParameter("status_code", Integer.class, ParameterMode.OUT)
+				.registerStoredProcedureParameter("message_error", String.class, ParameterMode.OUT);
+
+		int statusCode = (int) query.getOutputParameterValue("status_code");
+		String messageError = query.getOutputParameterValue("message_error").toString();
+
+		switch (StoreProcedureStatusCodeEnum.valueOf(statusCode)) {
+		case SUCCESS:
+			return new StoreProcedureListResult<Restaurant>(statusCode, messageError, query.getResultList());
+		case INPUT_INVALID:
+			throw new TechresHttpException(HttpStatus.BAD_REQUEST, messageError);
+		default:
+			throw new Exception(messageError);
+		}
+	}
+
+}
