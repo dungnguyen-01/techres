@@ -27,7 +27,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 	}
 
 	@Override
-	public StoreProcedureListResult<Restaurant> spGListRestaurants() throws Exception {
+	public List<Restaurant> spGListRestaurants() throws Exception {
 		return dao.spGListRestaurants();
 	}
 

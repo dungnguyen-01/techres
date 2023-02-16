@@ -1,9 +1,11 @@
 package vn.aloapp.training.springboot.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
+import javax.xml.ws.soap.AddressingFeature.Responses;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +24,16 @@ import org.springframework.web.bind.annotation.RestController;
 import vn.aloapp.training.springboot.entity.Area;
 import vn.aloapp.training.springboot.entity.Branch;
 import vn.aloapp.training.springboot.entity.Restaurant;
+import vn.aloapp.training.springboot.entity.RestaurantBrand;
 import vn.aloapp.training.springboot.entity.StoreProcedureListResult;
 import vn.aloapp.training.springboot.entity.Table;
 import vn.aloapp.training.springboot.request.CRUDListRestaurantRequest;
 import vn.aloapp.training.springboot.request.CRUDRestaurantRequest;
 import vn.aloapp.training.springboot.response.AreaResponse;
 import vn.aloapp.training.springboot.response.BaseResponse;
+import vn.aloapp.training.springboot.response.BranchResponse;
+import vn.aloapp.training.springboot.response.ObjectList;
+import vn.aloapp.training.springboot.response.RestaurantBrandResponse;
 import vn.aloapp.training.springboot.response.RestaurantResponse;
 import vn.aloapp.training.springboot.response.TableResponse;
 import vn.aloapp.training.springboot.service.AreaService;
@@ -98,8 +104,8 @@ public class RestaurantController extends BaseController {
 	@RequestMapping(value = "", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<BaseResponse> getList() throws Exception {
 		BaseResponse response = new BaseResponse();
-		StoreProcedureListResult<Restaurant> restaurants = restaurantService.spGListRestaurants();
-		response.setData(new RestaurantResponse().mapToList(restaurants.getResult()));
+		List<Restaurant> restaurants = restaurantService.spGListRestaurants();
+		response.setData(new RestaurantResponse().mapToList(restaurants));
 		return new ResponseEntity<BaseResponse>(response, HttpStatus.OK);
 	}
 
@@ -160,26 +166,149 @@ public class RestaurantController extends BaseController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@GetMapping(value = "/{id}/detail", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<BaseResponse<Restaurant>> getDetail(@PathVariable("id") int id) throws Exception {
 		BaseResponse response = new BaseResponse();
+		
+		List<Integer> listRestaurantBrands = new ArrayList<>();
+		List<Integer> listBranches = new ArrayList<>();
+		List<Integer> listAreas = new ArrayList<>();
+		
+		Restaurant restaurant = restaurantService.findOneById(id);
+		
+		List<RestaurantBrand> restaurantBrands = restaurantBrandService.spGRestaurantBrandByRestaurantIds(new ObjectMapper().writeValueAsString(restaurant.getId()));
+		restaurantBrands.forEach(x -> listRestaurantBrands.add(x.getId()));
 
-		List<Area> areas = areaService.spGAreasByBranchIds(null);
-		List<Branch> branches = branchService.spGBranchByRestaurantBrandIds(null);
-		List<Table> tables = tableService.spGTablesByAreaIds(null);
+		List<Branch> branches = branchService.spGBranchByRestaurantBrandIds(new ObjectMapper().writeValueAsString(listRestaurantBrands));
+		branches.forEach(x -> listBranches.add(x.getId()));
+		
+		List<Area> areas = areaService.spGAreasByBranchIds(new ObjectMapper().writeValueAsString(listBranches));
+		areas.forEach(x -> listAreas.add(x.getId()));
+		
+		List<Table> tables = tableService.spGTablesByAreaIds(new ObjectMapper().writeValueAsString(listAreas));
 
-		List<AreaResponse> areasResponses = new AreaResponse().mapToList(areas);
-		List<TableResponse> tableResponses = new TableResponse().mapToList(tables);
-
-		areasResponses = areasResponses.stream().map(x -> {
-			List<TableResponse> tableResponseData = tableResponses.stream().filter(y -> y.getAreaId() == x.getId())
+		
+		List<RestaurantBrandResponse> restaurantBrandResponses  = new RestaurantBrandResponse().mapToList(restaurantBrands);		
+		List<BranchResponse> branchResponses  = new BranchResponse().mapToList(branches);
+		List<AreaResponse> areaResponses = new AreaResponse().mapToList(areas);
+		List<TableResponse> tableResponses = new TableResponse().mapToList(tables);			
+		
+		
+		restaurantBrandResponses.stream().map(x -> {
+			List<BranchResponse> branchResponseData = branchResponses.stream().filter(y -> y.getRestaurantBrandId() == x.getId())
 					.collect(Collectors.toList());
-			x.getList().setTotalRecord(tableResponseData.size());
-			x.getList().setList(tableResponses);
+			
+			branchResponseData.stream().map(branch -> {
+				List<AreaResponse> areaResponseData = areaResponses.stream().filter(y -> y.getBranchId() == branch.getId())
+						.collect(Collectors.toList());
+				
+				areaResponses.stream().map(area -> {
+					List<TableResponse> tableResponseData = tableResponses.stream().filter(y -> y.getAreaId() == area.getId())
+							.collect(Collectors.toList());
+					area.getList().setTotalRecord(tableResponseData.size());
+					area.getList().setList(tableResponseData.size() > 0? tableResponseData : new ArrayList<>());
+					return area;
+				}).collect(Collectors.toList());
+				
+				branch.getList().setTotalRecord(areaResponseData.size());
+				branch.getList().setList(areaResponseData);
+				
+				return branch;
+			}).collect(Collectors.toList());
+			
+			
+			x.getList().setTotalRecord(branchResponseData.size());
+			x.getList().setList(branchResponseData);
 			return x;
 		}).collect(Collectors.toList());
-
+		
+			
+		RestaurantResponse retaurant = new RestaurantResponse(restaurant);
+		retaurant.getList().setTotalRecord(restaurantBrandResponses.size());
+		retaurant.getList().setList(restaurantBrandResponses);
+		
+		response.setData(retaurant);
+		
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@GetMapping(value = "/list-tree", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<BaseResponse<Restaurant>> getListTree() throws Exception {
+		BaseResponse response = new BaseResponse();
+		
+		List<Restaurant> restaurants = restaurantService.spGListRestaurants();
+		
+		List<Integer> listRestaurants = new ArrayList<>();
+		List<Integer> listRestaurantBrands = new ArrayList<>();
+		List<Integer> listBranches = new ArrayList<>();
+		List<Integer> listAreas = new ArrayList<>();
+		
+		
+		restaurants.forEach(x -> listRestaurants.add(x.getId()));
+		
+		
+		List<RestaurantBrand> restaurantBrands = restaurantBrandService.spGRestaurantBrandByRestaurantIds(new ObjectMapper().writeValueAsString(listRestaurants));
+		restaurantBrands.forEach(x -> listRestaurantBrands.add(x.getId()));
+
+		List<Branch> branches = branchService.spGBranchByRestaurantBrandIds(new ObjectMapper().writeValueAsString(listRestaurantBrands));
+		branches.forEach(x -> listBranches.add(x.getId()));
+		
+		List<Area> areas = areaService.spGAreasByBranchIds(new ObjectMapper().writeValueAsString(listBranches));
+		areas.forEach(x -> listAreas.add(x.getId()));
+		
+		List<Table> tables = tableService.spGTablesByAreaIds(new ObjectMapper().writeValueAsString(listAreas));
+
+		
+		List<RestaurantResponse> restaurantResponses  = new RestaurantResponse().mapToList(restaurants);		
+		List<RestaurantBrandResponse> restaurantBrandResponses  = new RestaurantBrandResponse().mapToList(restaurantBrands);		
+		List<BranchResponse> branchResponses  = new BranchResponse().mapToList(branches);
+		List<AreaResponse> areaResponses = new AreaResponse().mapToList(areas);
+		List<TableResponse> tableResponses = new TableResponse().mapToList(tables);			
+		
+		
+		restaurantBrandResponses.stream().map(x -> {
+			List<BranchResponse> branchResponseData = branchResponses.stream().filter(y -> y.getRestaurantBrandId() == x.getId())
+					.collect(Collectors.toList());
+			
+			branchResponseData.stream().map(branch -> {
+				List<AreaResponse> areaResponseData = areaResponses.stream().filter(y -> y.getBranchId() == branch.getId())
+						.collect(Collectors.toList());
+				
+				areaResponses.stream().map(area -> {
+					List<TableResponse> tableResponseData = tableResponses.stream().filter(y -> y.getAreaId() == area.getId())
+							.collect(Collectors.toList());
+					area.getList().setTotalRecord(tableResponseData.size());
+					area.getList().setList(tableResponseData.size() > 0? tableResponseData : new ArrayList());
+					return area;
+				}).collect(Collectors.toList());
+				
+				branch.getList().setTotalRecord(areaResponseData.size());
+				branch.getList().setList(areaResponseData);
+				
+				return branch;
+			}).collect(Collectors.toList());
+			
+			
+			x.getList().setTotalRecord(branchResponseData.size());
+			x.getList().setList(branchResponseData);
+			return x;
+		}).collect(Collectors.toList());
+		
+			
+		restaurants.forEach(restaurant -> {
+			RestaurantResponse res = new RestaurantResponse(restaurant);
+			res.getList().setTotalRecord(restaurantBrandResponses.size());
+			res.getList().setList(restaurantBrandResponses);
+			restaurantResponses.add(res);
+		});
+		
+		
+		response.setData(restaurantResponses);
+		
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
 
 }

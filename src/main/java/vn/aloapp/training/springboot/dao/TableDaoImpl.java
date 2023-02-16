@@ -173,6 +173,7 @@ public class TableDaoImpl extends AbstractDao<Integer, Table> implements TableDa
 		StoredProcedureQuery query = this.getSession()
 				.createStoredProcedureQuery("sp_g_tables_by_area_ids", Table.class)
 
+				.registerStoredProcedureParameter("areaIds", String.class, ParameterMode.IN)		
 				.registerStoredProcedureParameter("status_code", Integer.class, ParameterMode.OUT)
 				.registerStoredProcedureParameter("message_error", String.class, ParameterMode.OUT);
 

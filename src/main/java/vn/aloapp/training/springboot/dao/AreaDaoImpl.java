@@ -197,7 +197,7 @@ public class AreaDaoImpl extends AbstractDao<Integer, Area> implements AreaDao {
 	public List<Area> spGAreasByBranchIds(String branchIds) throws Exception {
 		StoredProcedureQuery query = this.getSession()
 				.createStoredProcedureQuery("sp_g_areas_by_branch_ids", Area.class)
-				.registerStoredProcedureParameter("areaIds", String.class, ParameterMode.IN)
+				.registerStoredProcedureParameter("branchIds", String.class, ParameterMode.IN)
 				.registerStoredProcedureParameter("status_code", Integer.class, ParameterMode.OUT)
 				.registerStoredProcedureParameter("message_error", String.class, ParameterMode.OUT);
 

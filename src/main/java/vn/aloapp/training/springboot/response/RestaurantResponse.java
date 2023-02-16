@@ -31,6 +31,9 @@ public class RestaurantResponse {
 	
 	@JsonProperty("status")
 	private int status;
+	
+	@JsonProperty("list")
+	private ObjectList list;
 
 	@JsonProperty("created_at")
 	private Date createdAt;
@@ -47,6 +50,7 @@ public class RestaurantResponse {
 		this.address = entity.getAddress();
 		this.logo = entity.getLogo();
 		this.status = entity.getStatus();
+		this.list = new ObjectList();
 		this.createdAt = entity.getCreatedAt();
 	}
 
@@ -116,6 +120,16 @@ public class RestaurantResponse {
 
 	public void setStatus(int status) {
 		this.status = status;
+	}
+	
+	
+
+	public ObjectList getList() {
+		return list;
+	}
+
+	public void setList(ObjectList list) {
+		this.list = list;
 	}
 
 	public Date getCreatedAt() {

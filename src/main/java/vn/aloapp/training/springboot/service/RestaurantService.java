@@ -11,7 +11,7 @@ public interface RestaurantService {
 	public Restaurant spUCreateRestaurant(String name, String email, String phone, String info, String address,
 			String logo) throws Exception;
 
-	public StoreProcedureListResult<Restaurant> spGListRestaurants() throws Exception;
+	public List<Restaurant> spGListRestaurants() throws Exception;
 
 	public Restaurant findById(Integer id) throws Exception;
 

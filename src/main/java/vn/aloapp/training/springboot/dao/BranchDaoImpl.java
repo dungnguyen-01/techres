@@ -1,5 +1,7 @@
 package vn.aloapp.training.springboot.dao;
 
+import java.util.List;
+
 import javax.persistence.ParameterMode;
 import javax.persistence.StoredProcedureQuery;
 
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import vn.aloapp.training.common.enums.StoreProcedureStatusCodeEnum;
 import vn.aloapp.training.common.exception.TechresHttpException;
+import vn.aloapp.training.springboot.entity.Area;
 import vn.aloapp.training.springboot.entity.Branch;
 import vn.aloapp.training.springboot.entity.StoreProcedureListResult;
 
@@ -146,6 +149,31 @@ public class BranchDaoImpl extends AbstractDao<Integer, Branch> implements Branc
 		switch (StoreProcedureStatusCodeEnum.valueOf(statusCode)) {
 		case SUCCESS:
 			return new StoreProcedureListResult<Branch>(statusCode, messageError, query.getResultList());
+		case INPUT_INVALID:
+			throw new TechresHttpException(HttpStatus.BAD_REQUEST, messageError);
+		default:
+			throw new Exception(messageError);
+		}
+	}
+
+	@Override
+	public List<Branch> spGBranchByRestaurantBrandIds(String restaurantBrandIds) throws Exception {
+		StoredProcedureQuery query = this.getSession()
+				.createStoredProcedureQuery("sp_g_branches_by_restaurant_brand_ids", Branch.class)
+				.registerStoredProcedureParameter("restaurantBrandIds", String.class, ParameterMode.IN)
+				.registerStoredProcedureParameter("status_code", Integer.class, ParameterMode.OUT)
+				.registerStoredProcedureParameter("message_error", String.class, ParameterMode.OUT);
+
+		query.setParameter("restaurantBrandIds", restaurantBrandIds);
+		
+		
+
+		int statusCode = (int) query.getOutputParameterValue("status_code");
+		String messageError = query.getOutputParameterValue("message_error").toString();
+
+		switch (StoreProcedureStatusCodeEnum.valueOf(statusCode)) {
+		case SUCCESS:
+			return query.getResultList();
 		case INPUT_INVALID:
 			throw new TechresHttpException(HttpStatus.BAD_REQUEST, messageError);
 		default:

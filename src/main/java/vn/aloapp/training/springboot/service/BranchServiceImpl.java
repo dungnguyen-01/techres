@@ -1,5 +1,7 @@
 package vn.aloapp.training.springboot.service;
 
+import java.util.List;
+
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,5 +53,13 @@ public class BranchServiceImpl implements BranchService{
 		
 		return dao.spGFilterBranches(keyword, status, restaurantBrandId, restaurantId);
 	}
+
+	@Override
+	public List<Branch> spGBranchByRestaurantBrandIds(String restaurantBrandIds) throws Exception {
+		// TODO Auto-generated method stub
+		return dao.spGBranchByRestaurantBrandIds(restaurantBrandIds);
+	}
+
+	
 
 }

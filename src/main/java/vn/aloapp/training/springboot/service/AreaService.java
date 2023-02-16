@@ -29,6 +29,6 @@ public interface AreaService {
 	StoreProcedureListResult<Area> spGFilterAreas(String keyword, Integer branchId, Integer restaurantId,
 			Integer restaurantBrandId, Integer status) throws Exception;
 
-	public List<Area> spGAreasByBranchIds(String areaIds) throws Exception;
+	public List<Area> spGAreasByBranchIds(String branchIds) throws Exception;
 	
 }

@@ -1,5 +1,7 @@
 package vn.aloapp.training.springboot.dao;
 
+import java.util.List;
+
 import vn.aloapp.training.springboot.entity.Branch;
 import vn.aloapp.training.springboot.entity.StoreProcedureListResult;
 
@@ -18,5 +20,7 @@ public interface BranchDao {
 
 	StoreProcedureListResult<Branch> spGFilterBranches(String keyword, Integer status, Integer restaurantBrandId,
 			Integer restaurantId) throws Exception;
+
+	List<Branch> spGBranchByRestaurantBrandIds(String restaurantBrandIds) throws Exception;
 
 }

@@ -1,5 +1,7 @@
 package vn.aloapp.training.springboot.dao;
 
+import java.util.List;
+
 import javax.persistence.ParameterMode;
 import javax.persistence.StoredProcedureQuery;
 
@@ -11,6 +13,7 @@ import vn.aloapp.training.common.enums.StoreProcedureStatusCodeEnum;
 import vn.aloapp.training.common.exception.TechresHttpException;
 import vn.aloapp.training.springboot.entity.RestaurantBrand;
 import vn.aloapp.training.springboot.entity.StoreProcedureListResult;
+import vn.aloapp.training.springboot.entity.Table;
 
 @Repository("restaurantBrandDao")
 @SuppressWarnings("unchecked")
@@ -142,6 +145,30 @@ public class RestaurantBrandDaoImpl extends AbstractDao<Integer, RestaurantBrand
 		switch (StoreProcedureStatusCodeEnum.valueOf(statusCode)) {
 		case SUCCESS:
 			return new StoreProcedureListResult<RestaurantBrand>(statusCode, messageError, query.getResultList());
+		case INPUT_INVALID:
+			throw new TechresHttpException(HttpStatus.BAD_REQUEST, messageError);
+		default:
+			throw new Exception(messageError);
+		}
+	}
+
+	@Override
+	public List<RestaurantBrand> spGRestaurantBrandByRestaurantIds(String restaurantIds) throws Exception {
+		StoredProcedureQuery query = this.getSession()
+				.createStoredProcedureQuery("sp_g_restaurant_brand_by_restaurant_ids", RestaurantBrand.class)
+
+				.registerStoredProcedureParameter("restaurantIds", String.class, ParameterMode.IN)		
+				.registerStoredProcedureParameter("status_code", Integer.class, ParameterMode.OUT)
+				.registerStoredProcedureParameter("message_error", String.class, ParameterMode.OUT);
+
+		query.setParameter("restaurantIds", restaurantIds);
+
+		int statusCode = (int) query.getOutputParameterValue("status_code");
+		String messageError = query.getOutputParameterValue("message_error").toString();
+
+		switch (StoreProcedureStatusCodeEnum.valueOf(statusCode)) {
+		case SUCCESS:
+			return query.getResultList();
 		case INPUT_INVALID:
 			throw new TechresHttpException(HttpStatus.BAD_REQUEST, messageError);
 		default:

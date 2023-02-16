@@ -35,6 +35,9 @@ public class BranchResponse {
 	@JsonProperty("status")
 	private int status;
 	
+	@JsonProperty("list")
+	private ObjectList list;
+	
 	@JsonProperty("created_at")
 	private Date createdAt;
 	
@@ -50,6 +53,7 @@ public class BranchResponse {
 		this.addressFullText = entity.getAddressFullText();
 		this.phoneNumber = entity.getPhoneNumber();
 		this.status = entity.getStatus();
+		this.list = new ObjectList();
 		this.createdAt = entity.getCreatedAt();
 	}
 	
@@ -129,6 +133,16 @@ public class BranchResponse {
 	public void setCreatedAt(Date createdAt) {
 		this.createdAt = createdAt;
 	}
+
+	public ObjectList getList() {
+		return list;
+	}
+
+	public void setList(ObjectList list) {
+		this.list = list;
+	}
+	
+	
 	
 	
 }

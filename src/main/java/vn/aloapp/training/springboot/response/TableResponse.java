@@ -38,7 +38,9 @@ public class TableResponse {
 	
 	@JsonProperty("status")
 	private int status;
+
 	
+
 	@JsonProperty("created_at")
 	private Date createdAt;
 	
@@ -126,6 +128,7 @@ public class TableResponse {
 	public void setTotalSlot(int totalSlot) {
 		this.totalSlot = totalSlot;
 	}
+	
 
 	public int getStatus() {
 		return status;

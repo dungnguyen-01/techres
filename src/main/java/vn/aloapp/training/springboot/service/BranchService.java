@@ -21,6 +21,6 @@ public interface BranchService {
 	StoreProcedureListResult<Branch> spGFilterBranches(String keyword, Integer restaurantId, Integer restaurantBrandId,
 			Integer status) throws Exception;
 
-	List<Branch> spGBranchByRestaurantBrandIds(String  restaurantBrandIds);
+	List<Branch> spGBranchByRestaurantBrandIds(String  restaurantBrandIds) throws Exception;
 
 }

@@ -67,7 +67,7 @@ public class RestaurantDaoImpl extends AbstractDao<Integer, Restaurant> implemen
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public StoreProcedureListResult<Restaurant> spGListRestaurants() throws Exception {
+	public List<Restaurant> spGListRestaurants() throws Exception {
 		// TODO Auto-generated method stub
 		StoredProcedureQuery query = this.getSession()
 				.createStoredProcedureQuery("sp_g_list_restaurant", Restaurant.class)
@@ -80,7 +80,7 @@ public class RestaurantDaoImpl extends AbstractDao<Integer, Restaurant> implemen
 
 		switch (StoreProcedureStatusCodeEnum.valueOf(statusCode)) {
 		case SUCCESS:
-			return new StoreProcedureListResult<Restaurant>(statusCode, messageError, query.getResultList());
+			return query.getResultList();
 		case INPUT_INVALID:
 			throw new TechresHttpException(HttpStatus.BAD_REQUEST, messageError);
 		default:

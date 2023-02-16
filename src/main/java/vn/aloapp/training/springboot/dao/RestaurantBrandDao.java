@@ -1,5 +1,7 @@
 package vn.aloapp.training.springboot.dao;
 
+import java.util.List;
+
 import vn.aloapp.training.springboot.entity.RestaurantBrand;
 import vn.aloapp.training.springboot.entity.StoreProcedureListResult;
 
@@ -18,5 +20,7 @@ public interface RestaurantBrandDao {
 
 	StoreProcedureListResult<RestaurantBrand> spGFilterRestaurantBrands(String keyword, Integer restaurantId,
 			Integer status) throws Exception;
+
+	List<RestaurantBrand> spGRestaurantBrandByRestaurantIds(String restaurantIds) throws Exception;
 
 }
